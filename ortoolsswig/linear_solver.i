@@ -66,6 +66,7 @@ class MPSolutionResponse;
 #include "ortools/linear_solver/model_validator.h"
 
 typedef ::absl::Status Status;
+typedef int64_t		int64;
 %}
 
 // %pythoncode %{

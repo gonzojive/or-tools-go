@@ -1,1 +1,17 @@
 licenses(["notice"])  # Apache 2.0
+
+exports_files([
+    "pcre.BUILD",
+    "scip.BUILD",
+    "swig.BUILD",
+])
+
+sh_binary(
+  name = "bazel-swig",
+  srcs = ["bazel-swig.sh"],
+  data = [
+    "@swig//:templates",
+    "@swig//:swig",
+  ],
+  deps = ["@bazel_tools//tools/bash/runfiles"],
+)

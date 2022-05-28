@@ -1,5 +1,4 @@
 # From https://github.com/orrsella/bazel-example/blob/master/.gitignore
-bazel
 bazel-bazel-test
 bazel-bin
 bazel-genfiles

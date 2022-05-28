@@ -8,8 +8,25 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_r
 
 git_repository(
     name = "ortools",
-    commit = "8d19323faf51f2f004e4de6c1b32a74001fbc7c1", #tag v8.0
+    commit = "49b6301e1e1e231d654d79b6032e79809868a70e",
     remote = "https://github.com/google/or-tools.git",
+)
+
+# Eigen has no Bazel build.
+new_git_repository(
+    name = "eigen",
+    tag = "3.4.0",
+    remote = "https://gitlab.com/libeigen/eigen.git",
+    build_file_content =
+"""
+cc_library(
+    name = 'eigen3',
+    srcs = [],
+    includes = ['.'],
+    hdrs = glob(['Eigen/**']),
+    visibility = ['//visibility:public'],
+)
+"""
 )
 
 # TODO(reddaly): Migrate to rules_cc: https://github.com/bazelbuild/rules_cc
@@ -30,35 +47,46 @@ git_repository(
 http_archive(
     name = "bazel_skylib",
     urls = [
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
     ],
-    sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c",
+    sha256 = "f7be3474d42aae265405a592bb7da8e171919d74c16f082a5457840f06054728",
 )
 
 git_repository(
     name = "com_google_protobuf",
-    commit = "2514f0bd7da7e2af1bed4c5d1b84f031c4d12c10",  # release v3.14.0
+    commit = "e73ed1630fdec85d7fb513c166629ed49cd4eb18",  # release v21
     remote = "https://github.com/protocolbuffers/protobuf.git",
 )
 
 git_repository(
     name = "com_google_protobuf_cc",
-    commit = "2514f0bd7da7e2af1bed4c5d1b84f031c4d12c10",  # release v3.14.0
+    commit = "e73ed1630fdec85d7fb513c166629ed49cd4eb18",  # release v3.14.0
     remote = "https://github.com/protocolbuffers/protobuf.git",
 )
 
 git_repository(
     name = "com_google_absl",
-    commit = "b56cbdd", # release 20200923
+    commit = "215105818dfde3174fe799600bb0f3cae233d0bf",  # release 20211102.0
     remote = "https://github.com/abseil/abseil-cpp.git",
 )
 
-http_archive(
-  name = "rules_cc",
-  urls = ["https://github.com/bazelbuild/rules_cc/archive/262ebec3c2296296526740db4aefce68c80de7fa.zip"],
-  strip_prefix = "rules_cc-262ebec3c2296296526740db4aefce68c80de7fa",
+git_repository(
+    name = "rules_cc",
+    remote = "https://github.com/bazelbuild/rules_cc.git",
+    commit = "8bb0eb5c5ccd96b91753bb112096bb6993d16d13",
+    shallow_since = "1652890817 -0700",
 )
+
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+bazel_skylib_workspace()
+
+load("@rules_cc//cc:repositories.bzl", "rules_cc_dependencies", "rules_cc_toolchains")
+
+rules_cc_dependencies()
+
+rules_cc_toolchains()
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
@@ -80,12 +108,13 @@ http_archive(
     url = "http://ftp.gnu.org/gnu/glpk/glpk-4.52.tar.gz",
 )
 
-http_archive(
+new_git_repository(
     name = "scip",
-    build_file = "@ortools//bazel:scip.BUILD",
-    patches = [ "@ortools//bazel:scip.patch" ],
-    sha256 = "033bf240298d3a1c92e8ddb7b452190e0af15df2dad7d24d0572f10ae8eec5aa",
-    url = "https://github.com/google/or-tools/releases/download/v7.7/scip-7.0.1.tgz",
+    build_file = "//third_party:scip.BUILD",
+    patches = ["@ortools//bazel:scip.patch"],
+    patch_args = ["-p1"],
+    tag = "v800",
+    remote = "https://github.com/scipopt/scip.git",
 )
 
 http_archive(
@@ -110,29 +139,28 @@ http_archive(
 # Go stuff
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "207fad3e6689135c5d8713e5a17ba9d1290238f47b9ba545b63d9303406209c6",
+    sha256 = "ab21448cef298740765f33a7f5acee0607203e4ea321219f2a4c85a6e0fb0a27",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.24.7/rules_go-v0.24.7.tar.gz",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.24.7/rules_go-v0.24.7.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/archive/refs/tags/v0.32.0.zip",
+        "https://github.com/bazelbuild/rules_go/archive/refs/tags/v0.32.0.zip",
     ],
 )
 
 http_archive(
     name = "bazel_gazelle",
-    sha256 = "d8c45ee70ec39a57e7a05e5027c32b1576cc7f16d9dd37135b0eddde45cf1b10",
+    sha256 = "5982e5463f171da99e3bdaeff8c0f48283a7a5f396ec5282910b9e8a49c0dd7e",
     urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/bazel-gazelle/releases/download/v0.20.0/bazel-gazelle-v0.20.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.20.0/bazel-gazelle-v0.20.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.25.0/bazel-gazelle-v0.25.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.25.0/bazel-gazelle-v0.25.0.tar.gz",
     ],
 )
 
-load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 go_rules_dependencies()
 
-go_register_toolchains()
-
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+go_register_toolchains(version = "1.18.2")
 
 gazelle_dependencies()
 
@@ -153,6 +181,13 @@ http_archive(
         "https://pilotfiber.dl.sourceforge.net/project/swig/swig/swig-3.0.8/swig-3.0.8.tar.gz",
     ],
 )
+
+#new_git_repository(
+#    name = "swig",
+#    remote = "https://github.com/swig/swig.git",
+#    commit = "1d6f4b4eaeb71a7f1cfadf6358436fbb55cb47cb",
+#    build_file = "//third_party:swig.BUILD",
+#)
 
 http_archive(
     name = "pcre",

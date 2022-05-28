@@ -15,15 +15,16 @@ ibazel test //ortoolsswig:go_default_test
 ### Regenerating the SWIG bindings
 
 For now, some generated files are checked in. They can be regenerated using this
-command:
+command if or-tools and abseil-cpp are checked out:
 
 ```shell
-swig -v -go -cgo -c++ -intgosize 64 \
-  -I/home/red/git/or-tools \
-  -I/home/red/git/abseil-cpp \
-  -o linear_solver_go_wrap.cc \
-  -module ortoolsswig \
-  linear_solver.i
+bazel run //third_party:bazel-swig -- \
+ -v -go -cgo -c++ -intgosize 64  \
+ -I/home/red/git/or-tools   \
+ -I/home/red/git/abseil-cpp  \
+ -o /home/red/git/or-tools-go/ortoolsswig/linear_solver_go_wrap.cc  \
+ -module ortoolsswig \
+ /home/red/git/or-tools-go/ortoolsswig/linear_solver.i
 ```
 
 It will be necessary to clone absl and or-tools:
