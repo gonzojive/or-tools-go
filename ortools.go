@@ -6,7 +6,7 @@ package ortools
 import (
 	"fmt"
 
-	"github.com/gonzojive/or-tools-go/ortools/ortoolsswig"
+	"github.com/gonzojive/or-tools-go/ortoolsswig"
 )
 
 // ProblemType is a type of OptimizationProblemType supported by the OR Tools library.
